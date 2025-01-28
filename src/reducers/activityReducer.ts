@@ -4,7 +4,9 @@ import { Activity } from '../types/index';
 // Define the type for activity actions
 export type ActivityActions =
     { type: 'save-activity', payload: { newActivity: Activity } } |
-    { type: 'set-activeId', payload: { id: Activity[ 'id' ] } }
+    { type: 'set-activeId', payload: { id: Activity[ 'id' ] } } |
+    { type: 'delete-activity', payload: { id: Activity[ 'id' ] } } |
+    { type: 'restart-app' }
 
 
 // Define the state type for activities
@@ -13,9 +15,13 @@ export type ActivityState = {
     activeId: Activity[ 'id' ] // ID of the active activity
 }
 
+const localStorageActivities = (): Activity[] => {
+    const activities = localStorage.getItem('activities') // Get the activities from local storage
+    return activities ? JSON.parse(activities) : [] // Parse the activities or return an empty array
+}
 // Initialize the state with an empty activities array
 export const initialState: ActivityState = {
-    activities: [],
+    activities: localStorageActivities(), // Get the activities from local storage
     activeId: ''
 }
 
@@ -50,6 +56,16 @@ export const activityReducer = (
             return {
                 ...state, // Keep the existing state
                 activeId: action.payload.id // Set the activeId to the new ID
+            }
+        case 'delete-activity': // Handle the delete-activity action
+            return {
+                ...state, // Keep the existing state
+                activities: state.activities.filter((activity) => activity.id !== action.payload.id) // Remove the activity with the specified ID
+            }
+        case 'restart-app': // Handle the restart-app action
+            return {
+                activities: [], // Reset the activities to an empty array
+                activeId: '' // Reset the activeId to an empty string
             }
         default: // Return the current state for any unknown action
             return state

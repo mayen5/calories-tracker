@@ -1,4 +1,4 @@
-import { useReducer } from 'react'
+import { useEffect, useMemo, useReducer } from 'react'
 import { Form } from './components/Form'
 import { activityReducer, initialState } from './reducers/activityReducer'
 import { ActivityList } from './components/ActivityList'
@@ -6,6 +6,17 @@ import { ActivityList } from './components/ActivityList'
 function App() {
 
   const [ state, dispatch ] = useReducer(activityReducer, initialState)
+
+  useEffect(() => {
+    localStorage.setItem('activities', JSON.stringify(state.activities))
+  }, [ state.activities ])
+
+  const canRestartApp = () => useMemo(() => state.activities.length, [ state.activities ])
+
+  const restartApp = () => {
+    dispatch({ type: 'restart-app' })
+  }
+
 
   return (
     <>
@@ -15,7 +26,13 @@ function App() {
             Calories Tracker
           </h1>
 
-          <button></button>
+          <button
+            className='bg-gray-800 hover:bg-gray-900 p-2 font-bold uppercase text-white cursor-pointer rounded text-sm disabled:opacity-10'
+            disabled={!canRestartApp()}
+            onClick={restartApp}
+          >
+            Restart App
+          </button>
         </div>
       </header>
 
